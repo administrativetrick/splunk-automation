@@ -1,0 +1,9 @@
+---
+
+- name: Run Splunk Diag
+  hosts: splunkenterprise
+  become: true
+  tasks:
+    - name: This command will run Splunk Diags
+      command:
+        cmd: /opt/splunk/bin/splunk diag
