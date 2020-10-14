@@ -1,0 +1,38 @@
+---
+
+- name: Set Cluster Master Indexer Discovery Stanza
+  hosts: splunkmasternode
+  become: true
+  tasks:
+    - name: Set mode in Clustering stanza in server.conf
+      ini_file:
+        path: "/opt/splunk/etc/system/local/server.conf"
+        section: "{{ item.section }}"
+        option: "{{ item.option }}"
+        value: "{{ item.value }}"
+      loop:
+        - { section: 'indexer_discovery', option: 'pass4SymmKey', value: '{{ symmkey }}'  }
+        - { section: 'indexer_discovery', option: 'indexerWeightByDiskCapacity', value: 'true' }
+
+- name: Create app for indexer_discovery in DS that will be pushed to UFs
+  hosts: splunklicensemaster
+  become: true
+  tasks:
+    - name: Create folder for app
+      file:
+        path: /opt/splunk/etc/deployment-apps/all_indexer_discovery
+        state: directory
+    - name: Set stanzas for apps
+      ini_file:
+        path: "/opt/splunk/etc/deployment-apps/all_indexer_discovery/outputs.conf"
+        section: "{{ item.section }}"
+        option: "{{ item.option }}"
+        value: "{{ item.value }}"
+      loop:
+        - { section: 'indexer_discovery:master1', option: 'pass4SymmKey', value: '{{ symmkey }}'  }
+        - { section: 'indexer_discovery:master1', option: 'master_uri', value: '{{ cluster_master_uri }}' }
+        - { section: 'tcpout:group1', option: 'autoLBFrequency', value: '30' }
+        - { section: 'tcpout:group1', option: 'forceTimebasedAutoLB', value: 'true' }
+        - { section: 'tcpout:group1', option: 'indexerDiscovery', value: 'master1' }
+        - { section: 'tcpout:group1', option: 'useACK', value: 'true' }
+        - { section: 'tcpout', option: 'defaultGroup', value: 'group1' }
