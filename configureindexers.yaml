@@ -1,0 +1,22 @@
+---
+
+- name: Configure Indexers
+  hosts: splunkindexer
+  tasks:
+    - name: Set startwebserver on indexers to zero in web.conf
+      ini_file:
+        dest: "/opt/splunk/etc/system/local/web.conf"
+        section: "settings"
+        option: "startwebserver"
+        value: "0"
+      become: true
+#- name: Configure Indexers
+#  hosts: splunkindexer
+#  tasks:
+#    - name: Set inputs.conf on indexers to listen on port 9997
+#      ini_file:
+#        dest: "/opt/splunk/etc/system/local/inputs.conf"
+#        section: "splunktcp://9997"
+#        option: "disabled"
+#        value: "0"
+#      become: true
