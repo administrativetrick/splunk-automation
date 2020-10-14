@@ -1,0 +1,16 @@
+---
+
+- hosts: splunkenterprise
+  become: true
+  tasks:
+    - name: Remove directory
+      file:
+        path: /opt/splunk
+        state: absent
+- hosts: uf
+  become: true
+  tasks:
+    - name: Remove directory
+      file:
+        path: /opt/splunkforwarder
+        state: absent
