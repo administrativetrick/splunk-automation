@@ -1,0 +1,73 @@
+---
+
+- name: Configure Indexer Master
+  hosts: splunkmasternode
+  become: true
+  tasks:
+    - name: Set mode in Clustering stanza in server.conf
+      ini_file:
+        dest: "/opt/splunk/etc/system/local/server.conf"
+        section: "clustering"
+        option: "mode"
+        value: "master"
+    - name: Set Replication Factor in Clustering stanza in server.conf
+      ini_file:
+        dest: "/opt/splunk/etc/system/local/server.conf"
+        section: "clustering"
+        option: "replication_factor"
+        value: "2"
+    - name: Set Search Factor in Clustering stanza in server.conf
+      ini_file:
+        dest: "/opt/splunk/etc/system/local/server.conf"
+        section: "clustering"
+        option: "search_factor"
+        value: "2"
+    - name: Set Pass4SymmKey in Clustering stanza in server.conf
+      ini_file:
+        dest: "/opt/splunk/etc/system/local/server.conf"
+        section: "clustering"
+        option: "pass4SymmKey"
+        value: "{{ symmkey }}"
+    - name: Set Cluster Label in Clustering stanza in server.conf
+      ini_file:
+        dest: "/opt/splunk/etc/system/local/server.conf"
+        section: "clustering"
+        option: "cluster_label"
+        value: "cluster1"
+    - name: Restart Servers
+      command: /opt/splunk/bin/splunk restart
+- name: Configure Indexer Peers
+  hosts: splunkindexer
+  become: true
+  tasks:
+    - name: Set mode in Clustering stanza in server.conf
+      ini_file:
+        dest: "/opt/splunk/etc/system/local/server.conf"
+        section: "clustering"
+        option: "mode"
+        value: "slave"
+    - name: Set master uri in Clustering stanza in server.conf
+      ini_file:
+        dest: "/opt/splunk/etc/system/local/server.conf"
+        section: "clustering"
+        option: "master_uri"
+        value: "{{ cluster_master_uri }}"
+    - name: Set Pass4SymmKey in Clustering stanza in server.conf
+      ini_file:
+        dest: "/opt/splunk/etc/system/local/server.conf"
+        section: "clustering"
+        option: "pass4SymmKey"
+        value: "{{ symmkey }}"
+    - name: Set Replication Port in Clustering stanza in server.conf
+      lineinfile:
+        path: "/opt/splunk/etc/system/local/server.conf"
+        line: "[replication_port://9887]"
+        state: present
+    - name: Restart Servers
+      command: /opt/splunk/bin/splunk restart
+- name: Configure Search Head CM URI
+  hosts: splunksearchhead
+  become: true
+  tasks:
+    - name:
+      command: "/opt/splunk/bin/splunk edit cluster-config -mode searchhead -master_uri '{{ cluster_master_uri }}' -secret {{ symmkey }} -auth {{ splunk_username }}:{{ splunk_password }}"
