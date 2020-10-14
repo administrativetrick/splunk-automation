@@ -1,0 +1,17 @@
+---
+
+- name: Create Indexes on Cluster Master
+  hosts: splunkmasternode
+  become: true
+  tasks:
+    - name:
+      ini_file:
+        path: /opt/splunk/etc/master-apps/all_indexes/local/indexes.conf
+        section: "{{ item.section }}"
+        option: "{{ item.option }}"
+        value: "{{ item.value }}"
+      loop:
+        - { section: 'test', option: 'homePath', value: '/opt/splunk/var/lib/splunk/test/db/' }
+        - { section: 'test', option: 'repFactor', value: 'auto' }
+        - { section: 'test', option: 'coldPath', value: '/opt/splunk/var/lib/splunk/test/colddb/' }
+        - { section: 'test', option: 'thawedPath', value: '/opt/splunk/var/lib/splunk/test/thaweddb/' }
