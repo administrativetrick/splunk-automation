@@ -1,0 +1,20 @@
+---
+
+- name: Clear Indexer Fishbuckets
+  hosts: splunkindexer
+  become: true
+  tasks:
+    - name: stop splunk
+      command: /opt/splunk/bin/splunk stop -auth "{{ splunk_username }}":"{{ splunk_password }}" --no-prompt --answer-yes
+    - name: Clear the fishbuckets
+      command: /opt/splunk/bin/splunk clean eventdata _thefishbucket -auth "{{ splunk_username }}":"{{ splunk_password }}" --no-prompt --answer-yes
+    - name: Start Splunk
+      command: /opt/splunk/bin/splunk start -auth "{{ splunk_username }}":"{{ splunk_password }}" --no-prompt --answer-yes
+- name:
+  hosts: uf
+  become: true
+  tasks:
+    - name: cler fishbucket on uf
+      command: rm -rf /opt/splunkforwarder/var/lib/splunk/fishbucket
+    - name: restart uf
+      command: /opt/splunkforwarder/bin/splunk restart -auth "{{ splunk_username }}":"{{ splunk_password }}" --no-prompt --answer-yes
