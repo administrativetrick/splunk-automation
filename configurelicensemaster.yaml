@@ -1,0 +1,14 @@
+---
+
+- name: Configure License Master
+  hosts: splunklicensemaster
+  become: true
+  tasks:
+    - name: Set master_uri in license stanza in server.conf
+      ini_file:
+        path: "/opt/splunk/etc/system/local/server.conf"
+        section: "{{ item.section }}"
+        option: "{{ item.option }}"
+        value: "{{ item.value }}"
+      loop:
+        - { section: 'license', option: 'master_uri', value: '{{ master_uri }}'  }
